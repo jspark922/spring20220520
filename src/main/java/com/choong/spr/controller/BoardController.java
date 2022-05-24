@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.choong.spr.domain.BoardDto;
@@ -57,7 +58,9 @@ public class BoardController {
 		BoardDto dto = service.getBoardById(id);
 		List<ReplyDto> replyList = replyService.getReplyByBoardId(id);
 		model.addAttribute("board", dto);
-		model.addAttribute("replyList", replyList);
+		
+		/* ajax로 처리하기 위해 삭제*/
+		// model.addAttribute("replyList", replyList);
 		
 	}
 	
@@ -90,6 +93,7 @@ public class BoardController {
 		
 		return "redirect:/board/list";
 	}
+	
 }
 
 
