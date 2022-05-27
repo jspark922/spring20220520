@@ -42,6 +42,7 @@ public class MemberController {
 		} else {
 			rttr.addFlashAttribute("message", "회원가입이 실패하였습니다.");
 			rttr.addFlashAttribute("member", member);
+			
 			return "redirect:/member/signup";
 		}
 	}
@@ -76,7 +77,7 @@ public class MemberController {
 	@ResponseBody
 	public String nickNameCheck(String nickName) {
 		
-		boolean exist = service.hasNickNameEmail(nickName);
+		boolean exist = service.hasMemberNickName(nickName);
 		
 		if (exist) {
 			return "notOk";
@@ -86,6 +87,8 @@ public class MemberController {
 	}
 	
 	@GetMapping("list")
+	// jsp (id, password, email, nickName, inserted) table로 보여주세요.
+	// ORDER BY inserted DESC
 	public void list(Model model) {
 		List<MemberDto> list = service.listMember();
 		model.addAttribute("memberList", list);
@@ -96,6 +99,7 @@ public class MemberController {
 		MemberDto member = service.getMemberById(id);
 		
 		model.addAttribute("member", member);
+		
 	}
 	
 	@PostMapping("remove")
@@ -109,5 +113,27 @@ public class MemberController {
 			rttr.addAttribute("id", dto.getId());
 			return "redirect:/member/get";
 		}
+	}
+	
+	@PostMapping("modify")
+	public String modifyMember(MemberDto dto, String oldPassword, RedirectAttributes rttr) {
+		
+		boolean success = service.modifyMember(dto, oldPassword);
+		
+		if (success) {
+			rttr.addFlashAttribute("message", "회원 정보가 수정되었습니다.");
+		} else {
+			rttr.addFlashAttribute("message", "회원 정보가 수정되지 않았습니다.");
+		}
+		
+		rttr.addFlashAttribute("member", dto); // model object
+		rttr.addAttribute("id", dto.getId()); // query string
+		
+		return "redirect:/member/get";
+	}
+	
+	@GetMapping("login")
+	public void loginPage() {
+		
 	}
 }

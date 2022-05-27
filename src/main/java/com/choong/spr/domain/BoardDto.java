@@ -10,7 +10,9 @@ public class BoardDto {
 	private int id;
 	private String title;
 	private String body;
+	private String memberId;
 	private LocalDateTime inserted;
+	private String writerNickName;
 	private int numOfReply;
 
 	public String getPrettyInserted() {
