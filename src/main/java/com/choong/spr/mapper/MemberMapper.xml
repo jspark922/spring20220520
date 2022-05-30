@@ -71,4 +71,5 @@
 		DELETE FROM Auth
 		WHERE memberId = #{id}
 	</delete>
+	
 </mapper>

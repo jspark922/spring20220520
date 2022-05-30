@@ -28,14 +28,14 @@
 	        </li>
         </sec:authorize>
         
+        <li class="nav-item">
+        	<a href="${signupUrl }" class="nav-link ${current == 'signup' ? 'active' : '' }">회원가입</a>
+        </li>
         <sec:authorize access="hasRole('ADMIN')">
 	        <li class="nav-item">
-	        	<a href="${signupUrl }" class="nav-link ${current == 'signup' ? 'active' : '' }">회원가입</a>
+	        	<a href="${memberListUrl }" class="nav-link ${current == 'memberList' ? 'active' : '' }">회원목록</a>
 	        </li>
         </sec:authorize>
-         <li class="nav-item">
-        	<a href="${memberListUrl }" class="nav-link ${current == 'memberList' ? 'active' : '' }">회원목록</a>
-        </li>
         
         <sec:authorize access="not isAuthenticated()">
 	        <li class="nav-item">

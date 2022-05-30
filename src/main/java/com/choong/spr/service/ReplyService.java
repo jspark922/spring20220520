@@ -1,8 +1,10 @@
 package com.choong.spr.service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +24,35 @@ public class ReplyService {
 
 	public List<ReplyDto> getReplyByBoardId(int boardId) {
 		// TODO Auto-generated method stub
-		return mapper.selectAllBoardId(boardId);
+		return mapper.selectAllBoardId(boardId, null);
 	}
 
-	public boolean updateReply(ReplyDto dto) {
-		// TODO Auto-generated method stub
-		return mapper.updateReply(dto) == 1;
+	public boolean updateReply(ReplyDto dto, Principal principal) {
+		ReplyDto old = mapper.selectReplyById(dto.getId());
+		
+		if (old.getMemberId().equals(principal.getName())) {
+			// 댓글 작성자와 로그인한 유저가 같을 때만 수정
+			return mapper.updateReply(dto) == 1;
+		} else { 
+			return false;
+		}
+		
 	}
 
-	public boolean deleteReply(int id) {
-		// TODO Auto-generated method stub
-		return mapper.deleteReply(id) == 1;
+	public boolean deleteReply(int id, Principal principal) {
+		ReplyDto old = mapper.selectReplyById(id);
+		
+		if (old.getMemberId().equals(principal.getName())) {
+			// 댓글 작성자와 로그인한 유저가 같을 때만 수정
+			return mapper.deleteReply(id) == 1;
+		} else { 
+			return false;
+		}
+		
+	}
+
+	public List<ReplyDto> getReplyWithOwnByBoardId(int boardId, String memberId) {
+		return mapper.selectAllBoardId(boardId, memberId);
 	}
 
 }

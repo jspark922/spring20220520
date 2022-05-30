@@ -8,7 +8,10 @@ import lombok.Data;
 public class ReplyDto {
 	private int id;
 	private int boardId;
+	private String memberId;
 	private String content;
+	private String nickName;
+	private boolean own;
 	private LocalDateTime inserted;
 
 	public String getPrettyInserted() {

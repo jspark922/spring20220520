@@ -42,7 +42,7 @@ public class BoardController {
 	}
 	
 	@PostMapping("insert")
-	public String insert(BoardDto board,Principal principal, RedirectAttributes rttr) {
+	public String insert(BoardDto board, ReplyDto reply, Principal principal, RedirectAttributes rttr) {
 		board.setMemberId(principal.getName());
 		boolean success = service.insertBoard(board);
 		
