@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.choong.spr.domain.BoardDto;
@@ -29,9 +30,9 @@ public class BoardController {
 	private ReplyService replyService;
 
 	@RequestMapping("list")
-	public void list(@RequestParam(name = "keyword", defaultValue= "") String keyword,
-					 @RequestParam(name = "type", defaultValue= "") String type, 
-					 Model model) {
+	public void list(@RequestParam(name = "keyword", defaultValue = "") String keyword,
+					 @RequestParam(name = "type", defaultValue = "") String type,
+			         Model model) {
 		List<BoardDto> list = service.listBoard(type, keyword);
 		model.addAttribute("boardList", list);
 	}
@@ -42,9 +43,21 @@ public class BoardController {
 	}
 	
 	@PostMapping("insert")
-	public String insert(BoardDto board, ReplyDto reply, Principal principal, RedirectAttributes rttr) {
+	public String insert(BoardDto board,
+			MultipartFile file,
+			Principal principal,
+			RedirectAttributes rttr) {
+		
+//		System.out.println(file);
+//		System.out.println(file.getOriginalFilename());
+//		System.out.println(file.getSize());
+		
+		if (file.getSize() > 0) {
+			board.setFileName(file.getOriginalFilename());
+		}
+		
 		board.setMemberId(principal.getName());
-		boolean success = service.insertBoard(board);
+		boolean success = service.insertBoard(board, file);
 		
 		if (success) {
 			rttr.addFlashAttribute("message", "새 글이 등록되었습니다.");
@@ -61,14 +74,13 @@ public class BoardController {
 		List<ReplyDto> replyList = replyService.getReplyByBoardId(id);
 		model.addAttribute("board", dto);
 		
-		/* ajax로 처리하기 위해 삭제*/
+		/* ajax로 처리하기 위해 삭제 */
 		// model.addAttribute("replyList", replyList);
 		
 	}
 	
 	@PostMapping("modify")
 	public String modify(BoardDto dto, Principal principal, RedirectAttributes rttr) {
-		
 		BoardDto oldBoard = service.getBoardById(dto.getId());
 		
 		if (oldBoard.getMemberId().equals(principal.getName())) {
@@ -86,6 +98,7 @@ public class BoardController {
 		
 		rttr.addAttribute("id", dto.getId());
 		return "redirect:/board/get";
+		
 	}
 	
 	@PostMapping("remove")
@@ -93,7 +106,7 @@ public class BoardController {
 		
 		// 게시물 정보 얻고
 		BoardDto oldBoard = service.getBoardById(dto.getId());
-		// 게시물 작성자(memberId)와 principal의 name과 비교해서 같을 때만 진행
+		// 게시물 작성자(memberId)와 principal의 name과 비교해서 같을 때만 진행.
 		if (oldBoard.getMemberId().equals(principal.getName())) {
 			boolean success = service.deleteBoard(dto.getId());
 			
@@ -103,16 +116,15 @@ public class BoardController {
 			} else {
 				rttr.addFlashAttribute("message", "글이 삭제 되지않았습니다.");
 			}
+			
 		} else {
 			rttr.addFlashAttribute("message", "권한이 없습니다.");
 			rttr.addAttribute("id", dto.getId());
 			return "redirect:/board/get";
 		}
-		// 아니면 리턴.
 		
 		return "redirect:/board/list";
 	}
-	
 }
 
 

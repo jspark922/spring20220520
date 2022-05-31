@@ -12,20 +12,22 @@
 		       m.nickName writerNickName
 		FROM Board b LEFT JOIN Reply r ON b.id = r.board_id
 		                  JOIN Member m ON b.memberId = m.id
-		<if test = "keyword != '%%'">
+		
+		<if test="keyword != '%%'">
 			<choose>
 				<when test="type == 'all'">
 					WHERE b.title LIKE #{keyword } OR
 					      b.body LIKE #{keyword }
 				</when>
 				<when test="type == 'title'">
-					WHERE b.title LIKE #{keyword } 
+					WHERE b.title LIKE #{keyword }
 				</when>
 				<when test="type == 'body'">
-					WHERE b.body LIKE #{keyword } 
+					WHERE  b.body LIKE #{keyword }
 				</when>
 			</choose>
 		</if>
+		
 		GROUP BY b.id
 		ORDER BY b.id DESC
 	</select>
@@ -37,14 +39,16 @@
 	
 	<select id="selectBoardById" resultType="com.choong.spr.domain.BoardDto">
 		SELECT b.id, 
-			   b.title, 
-			   b.body, 
-			   b.inserted, 
-			   COUNT(r.id) numOfReply, 
-			   m.id memberId, 
-			   m.nickName writerNickName 
-		FROM Board b LEFT JOIN Reply r ON b.id = r.board_id 
-						  JOIN Member m ON b.memberId = m.id
+		       b.title, 
+		       b.body, 
+		       b.inserted, 
+		       COUNT(r.id) numOfReply, 
+		       m.id memberId,
+		       m.nickName writerNickName, 
+		       f.fileName 
+		FROM Board b LEFT JOIN Reply r ON b.id = r.board_id
+		                  JOIN Member m ON b.memberId = m.id
+		             LEFT JOIN File f ON b.id = f.boardId 
 		WHERE b.id = #{id}
 	</select>
 	
@@ -70,5 +74,21 @@
 	<delete id="deleteByMemberId">
 	DELETE FROM Board
 	WHERE memberId = #{memberId}
+	</delete>
+	
+	<insert id="insertFile">
+	INSERT INTO File (boardId, fileName) 
+	VALUES (#{boardId}, #{fileName})
+	</insert>
+	
+	<select id="selectFileByBoardId" resultType="String">
+	SELECT fileName
+	FROM File
+	WHERE boardId = #{boardId}
+	</select>
+	
+	<delete id="deleteFileByBoardId">
+	DELETE FROM File
+	WHERE boardId = #{boardId}
 	</delete>
 </mapper>

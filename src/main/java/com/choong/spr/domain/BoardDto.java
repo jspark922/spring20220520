@@ -10,10 +10,11 @@ public class BoardDto {
 	private int id;
 	private String title;
 	private String body;
-	private String memberId;
 	private LocalDateTime inserted;
+	private String memberId;
 	private String writerNickName;
 	private int numOfReply;
+	private String fileName;
 
 	public String getPrettyInserted() {
 		// 24시간 이내면 시간만

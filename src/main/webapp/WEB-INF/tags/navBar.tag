@@ -10,6 +10,13 @@
 <c:url value="/member/login" var="loginUrl"></c:url>
 <c:url value="/logout" var="logoutUrl"></c:url>
 
+<sec:authorize access="isAuthenticated()">
+	<sec:authentication property="principal" var="principal"/>
+	<c:url value="/member/get" var="memberInfoUrl">
+		<c:param name="id" value="${principal.username }" />
+	</c:url>
+</sec:authorize>
+
 <nav class="navbar navbar-expand-md navbar-light bg-light mb-3">
   <div class="container">
     <a class="navbar-brand" href="${listUrl }"><i class="fa-solid fa-house"></i></a>
@@ -31,6 +38,13 @@
         <li class="nav-item">
         	<a href="${signupUrl }" class="nav-link ${current == 'signup' ? 'active' : '' }">회원가입</a>
         </li>
+        
+        <sec:authorize access="isAuthenticated()">
+        	<li class="nav-item">
+        		<a class="nav-link ${current == 'memberInfo' ? 'active' : '' }" href="${memberInfoUrl }">회원정보</a>
+        	</li>
+        </sec:authorize>
+        
         <sec:authorize access="hasRole('ADMIN')">
 	        <li class="nav-item">
 	        	<a href="${memberListUrl }" class="nav-link ${current == 'memberList' ? 'active' : '' }">회원목록</a>
