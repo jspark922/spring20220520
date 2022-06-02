@@ -94,15 +94,18 @@
 						replyListElement.append(replyElement);
 						$("#replyContent" + list[i].id).text(list[i].content);
 						
-						// own이 true일 때만 수정, 삭제 버튼 보이기
+						// own이 true일 때만 수정,삭제 버튼 보이기
 						if (list[i].own) {
 							$("#modifyButtonWrapper" + list[i].id).html(`
-								<span class="reply-edit-toggle-button badge bg-info text-dark" id="replyEditToggleButton${reply.id }" data-reply-id="\${list[i].id }" >
-							 		<i class="fa-solid fa-pen-to-square"></i>
-						 		</span>
-							 	<span class="reply-delete-button badge bg-danger" data-reply-id="\${list[i].id }">
-							 		<i class="fa-solid fa-trash-can"></i>
-							 	</span>
+								<span class="reply-edit-toggle-button badge bg-info text-dark"
+									id="replyEditToggleButton\${list[i].id }"
+									data-reply-id="\${list[i].id }">
+									<i class="fa-solid fa-pen-to-square"></i>
+								</span>
+								<span class="reply-delete-button badge bg-danger"
+									data-reply-id="\${list[i].id }">
+									<i class="fa-solid fa-trash-can"></i>
+								</span>
 							`);
 						}
 					}
@@ -239,9 +242,9 @@
 		<div class="row">
 			<div class="col">
 				<h1>글 본문 
-					
-					<sec:authorize>
+					<sec:authorize access="isAuthenticated()">
 						<sec:authentication property="principal" var="principal"/>
+
 						<c:if test="${principal.username == board.memberId }">
 							<button id="edit-button1" class="btn btn-secondary">
 								<i class="fa-solid fa-pen-to-square"></i>
@@ -271,9 +274,11 @@
 							cols="30" rows="10" readonly>${board.body }</textarea>
 					</div>
 					
-					<div>
-						<img src="file:///C:/imgtmp/board/${board.id }/${board.fileName }" alt="" />
-					</div>
+					<c:forEach items="${board.fileName }" var="file">
+						<div>
+							<img src="${imageUrl }/board/${board.id }/${file }" alt="" />
+						</div>
+					</c:forEach>
 					
 					<div>
 						<label for="input3" class="form-label">작성자</label>
