@@ -32,6 +32,7 @@
 						<tr>
 							<th><i class="fa-solid fa-hashtag"></i></th>
 							<th>제목</th>
+							<th>작성자</th>
 							<th><i class="fa-solid fa-calendar"></i></th>
 						</tr>
 					</thead>
@@ -48,6 +49,12 @@
 									<a href="${getUrl }">
 										<c:out value="${board.title }" />
 									</a>
+									
+									<c:if test="${board.hasFile }">
+										<span class="badge rounded-pill bg-light text-dark">
+											<i class="fa-solid fa-file"></i>
+										</span>
+									</c:if>
 									
 									<c:if test="${board.numOfReply > 0 }">
 										<span class="badge rounded-pill bg-light text-dark">

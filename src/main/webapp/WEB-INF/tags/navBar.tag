@@ -9,6 +9,7 @@
 <c:url value="/member/list" var="memberListUrl"></c:url>
 <c:url value="/member/login" var="loginUrl"></c:url>
 <c:url value="/logout" var="logoutUrl"></c:url>
+<c:url value="/member/initpw" var="initPasswordUrl"></c:url>
 
 <sec:authorize access="isAuthenticated()">
 	<sec:authentication property="principal" var="principal"/>
@@ -35,9 +36,11 @@
 	        </li>
         </sec:authorize>
         
-        <li class="nav-item">
-        	<a href="${signupUrl }" class="nav-link ${current == 'signup' ? 'active' : '' }">회원가입</a>
-        </li>
+        <sec:authorize access="isAnonymous()">
+	        <li class="nav-item">
+	        	<a href="${signupUrl }" class="nav-link ${current == 'signup' ? 'active' : '' }">회원가입</a>
+	        </li>
+        </sec:authorize>
         
         <sec:authorize access="isAuthenticated()">
         	<li class="nav-item">
@@ -49,6 +52,9 @@
 	        <li class="nav-item">
 	        	<a href="${memberListUrl }" class="nav-link ${current == 'memberList' ? 'active' : '' }">회원목록</a>
 	        </li>
+	        <div class="nav-item">
+	        	<a href="${initPasswordUrl }" class="nav-link">암호초기화</a>
+	        </div>
         </sec:authorize>
         
         <sec:authorize access="not isAuthenticated()">
@@ -59,7 +65,7 @@
         
         <sec:authorize access="isAuthenticated()">
 	        <li class="nav-item">
-	        	<button class="nav-link" type="submit" form="logoutForm1">로그아웃</button>
+	        	<button class="btn btn-link nav-link" type="submit" form="logoutForm1">로그아웃</button>
 	        </li>
         </sec:authorize>
       </ul>

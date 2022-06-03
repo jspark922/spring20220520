@@ -34,16 +34,16 @@ public class BoardService {
 	@Autowired
 	private ReplyMapper replyMapper;
 	
+	private S3Client s3;
+	
 	@Value("${aws.s3.bucketName}")
 	private String bucketName;
-	
-	private S3Client s3;
 	
 	public List<BoardDto> listBoard(String type, String keyword) {
 		// TODO Auto-generated method stub
 		return mapper.selectBoardAll(type, "%" + keyword + "%");
 	}
-
+	
 	@PostConstruct
 	public void init() {
 		Region region = Region.AP_NORTHEAST_2;
@@ -54,7 +54,7 @@ public class BoardService {
 	public void destroy() {
 		this.s3.close();
 	}
-	
+
 	@Transactional
 	public boolean insertBoard(BoardDto board, MultipartFile[] files) {
 //		board.setInserted(LocalDateTime.now());
@@ -62,19 +62,21 @@ public class BoardService {
 		// 게시글 등록
 		int cnt = mapper.insertBoard(board);
 		
+		addFiles(board.getId(), files);
+		
+		return cnt == 1; 
+	}
+
+	private void addFiles(int id, MultipartFile[] files) {
 		// 파일 등록 
 		if (files != null) {
 			for (MultipartFile file : files) {
 				if (file.getSize() > 0) {
-					mapper.insertFile(board.getId(), file.getOriginalFilename());
-					// saveFile(board.getId(), file); // 파일 시스템에 저장 
-					saveFileAwsS3(board.getId(), file); // s3에 업로드
+					mapper.insertFile(id, file.getOriginalFilename());
+					saveFileAwsS3(id, file); // s3에 업로드
 				}
 			}
 		}
-		
-		
-		return cnt == 1; 
 	}
 
 	private void saveFileAwsS3(int id, MultipartFile file) {
@@ -84,7 +86,8 @@ public class BoardService {
 				.acl(ObjectCannedACL.PUBLIC_READ)
 				.bucket(bucketName)
 				.key(key)
-				.build(); 
+				.build();
+		
 		RequestBody requestBody;
 		try {
 			requestBody = RequestBody.fromInputStream(file.getInputStream(), file.getSize());
@@ -98,7 +101,8 @@ public class BoardService {
 		
 	}
 
-	private void saveFile(int id, MultipartFile file){
+	private void saveFile(int id, MultipartFile file) {
+		// 디렉토리 만들기
 		String pathStr = "C:/imgtmp/board/" + id + "/";
 		File path = new File(pathStr);
 		path.mkdirs();
@@ -107,11 +111,13 @@ public class BoardService {
 		File des = new File(pathStr + file.getOriginalFilename());
 		
 		try {
+			// 파일 저장
 			file.transferTo(des);
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
+		
 	}
 
 	public BoardDto getBoardById(int id) {
@@ -123,39 +129,51 @@ public class BoardService {
 		return board;
 	}
 
-	public boolean updateBoard(BoardDto dto) {
-		// TODO Auto-generated method stub
-		return mapper.updateBoard(dto) == 1;
+	@Transactional
+	public boolean updateBoard(BoardDto dto, List<String> removeFileList, MultipartFile[] addFileList) {
+		if (removeFileList != null) {
+			for (String fileName : removeFileList) {
+				deleteFromAwsS3(dto.getId(), fileName);
+				mapper.deleteFileByBoardIdAndFileName(dto.getId(), fileName);
+			}
+		}
+		
+		if (addFileList != null) {
+			// File 테이블에 추가된 파일 insert
+			// s3에 upload
+			addFiles(dto.getId(), addFileList);
+		}
+		
+		// Board 테이블 update
+		int cnt = mapper.updateBoard(dto);
+		
+		return cnt == 1;
 	}
 
 	@Transactional
 	public boolean deleteBoard(int id) {
 		// 파일 목록 읽기
-		String fileName = mapper.selectFileByBoardId(id);
+		List<String> fileList = mapper.selectFileNameByBoard(id);
 		
-		// s3에서 지우기
-		deleteFormAwsS3(id, fileName);
+		removeFiles(id, fileList);
 		
-		
-		/*// 실제파일 삭제
-		if (fileName != null && !fileName.isEmpty()) {
-			String folder = "C:/imgtmp/board/" + id + "/";
-			String path = folder + fileName;
-			File file = new File(path);
-			file.delete();
-			
-			File dir = new File(folder);
-			dir.delete();
-		}*/
-		// 파일테이블 삭제
-		mapper.deleteFileByBoardId(id);
 		// 댓글테이블 삭제
 		replyMapper.deleteByBoardId(id);
 		
 		return mapper.deleteBoard(id) == 1;
 	}
 
-	private void deleteFormAwsS3(int id, String fileName) {
+	private void removeFiles(int id, List<String> fileList) {
+		// s3에서 지우기
+		for (String fileName : fileList) {
+			deleteFromAwsS3(id, fileName);
+		}
+		
+		// 파일테이블 삭제
+		mapper.deleteFileByBoardId(id);
+	}
+
+	private void deleteFromAwsS3(int id, String fileName) {
 		String key = "board/" + id + "/" + fileName;
 		
 		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
