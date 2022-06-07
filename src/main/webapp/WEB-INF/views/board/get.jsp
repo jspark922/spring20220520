@@ -79,7 +79,6 @@
 										<span id="modifyButtonWrapper\${list[i].id }">
 										</span>
 										
-
 										
 									</div>
 									<span class="badge bg-light text-dark">

@@ -11,9 +11,9 @@
 	
 	<select id="selectAllBoardId" resultType="com.choong.spr.domain.ReplyDto">
 	SELECT r.id, 
-	       r.board_id boardId, 
-	       r.content, 
-	       m.nickName, 
+	       r.board_id boardId,
+	       r.content,
+	       m.nickName writerNickName,
 	       r.inserted,
 	       IF (m.id = #{memberId}, 1, 0) own
 	FROM Reply r JOIN Member m ON r.memberId = m.id
@@ -40,12 +40,14 @@
 	
 	<select id="selectReplyById" resultType="com.choong.spr.domain.ReplyDto">
 	SELECT id,
-		   board_id boardId,  
-		   content, 
-		   memberId, 
-		   inserted 
-	FROM Reply 
+	       board_id boardId,
+		   content,
+		   memberId,
+		   inserted
+	FROM Reply
 	WHERE id = #{id}
+		   
+		   
 	</select>
 	
 	<delete id="deleteByMemberId">
